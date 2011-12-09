@@ -4,11 +4,13 @@
 	package="com.android.fixmystreet" android:versionCode="10"
 	android:versionName="1.01">
 
-<uses-sdk android:minSdkVersion="3" />
+<uses-sdk android:minSdkVersion="7" android:targetSdkVersion="7"/>
 	<!-- Permissions -->
 	<uses-permission android:name="android.permission.CAMERA" />
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS"></uses-permission>
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"></uses-permission>
 
 	<application android:icon="@drawable/house_icon"
 		android:label="Fix My Street" android:debuggable="false">
@@ -58,6 +60,8 @@
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
+		<activity android:name="LocationActivity"></activity>
+		<uses-library android:name="com.google.android.maps"></uses-library>
 
 	</application>
 </manifest> 

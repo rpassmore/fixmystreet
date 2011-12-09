@@ -16,6 +16,10 @@
 			android:layout_height="wrap_content" android:text="Add details"
 			android:drawableRight="@drawable/add" android:paddingRight="10dip"
 			android:paddingLeft="10dip" />
+		<Button android:id="@+id/map_location_button" android:layout_width="fill_parent"
+			android:layout_height="wrap_content" android:text="Set location"
+			android:drawableRight="@drawable/add" android:paddingRight="10dip"
+			android:paddingLeft="10dip" />
 
 		<View android:layout_width="1dip" android:layout_height="10dip"
 			android:src="@drawable/spacer" />

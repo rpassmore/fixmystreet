@@ -36,8 +36,7 @@ public class Details extends Activity {
 	final int NAME_WARNING = 999;
 	final int SUBJECT_WARNING = 998;
 	final int EMAIL_WARNING = 997;
-	private Bundle extras;
-	private Boolean havePicture = false;
+	private Bundle extras;	
 
 	/** Called when the activity is first created. */
 	@Override
@@ -65,8 +64,7 @@ public class Details extends Activity {
 		extras = getIntent().getExtras();
 		if (extras != null) {
 			// Details extras
-			subject = extras.getString("subject");
-			havePicture = extras.getBoolean("photo", havePicture);
+			subject = extras.getString("subject");			
 //			Log.d(LOG_TAG, "extras havePicture" + havePicture);
 		}
 		if (subject != null) {
@@ -92,10 +90,10 @@ public class Details extends Activity {
 						Intent i = new Intent(Details.this, Home.class);
 						extras.putString("name", name);
 						extras.putString("email", email);
-						extras.putString("subject", subject);
-						extras.putBoolean("photo", havePicture);
-						i.putExtras(extras);
-						startActivity(i);
+						extras.putString("subject", subject);						
+						i.putExtras(extras);						
+						setResult(RESULT_OK, i);
+						finish();
 					}
 				}
 			}

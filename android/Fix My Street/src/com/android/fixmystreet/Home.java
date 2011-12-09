@@ -54,6 +54,7 @@ public class Home extends Activity {
 	private Button btnReport;
 	private Button btnDetails;
 	private Button btnPicture;
+	private Button btnMapLocation;
 	// Info that's been passed from other activities
 	private Boolean haveDetails = false;
 	private Boolean havePicture = false;
@@ -83,6 +84,12 @@ public class Home extends Activity {
 	private static final int PHOTO_NOT_FOUND = 5;
 	private static final int UPON_UPDATE = 6;
 	private static final int COUNTRY_ERROR = 7;
+
+  private static final int PICK_PHOTO_ACTIVITY = 1;
+  private static final int PICTURE_ACTIVITY = 10;
+  private static final int LOCATION_MAP_ACTIVITY = 20;
+  protected static final int DETAILS_ACTIVITY = 30;
+	
 	private String serverResponse;
 	SharedPreferences settings;
 	String versionName = null;
@@ -99,6 +106,7 @@ public class Home extends Activity {
 	private Bundle extras;
 	private TextView textProgress;
 	private String exception_string = "";
+  private String addressString;
 
 	// Called when the activity is first created
 	@Override
@@ -115,6 +123,7 @@ public class Home extends Activity {
 		btnReport.setVisibility(View.GONE);
 		textProgress = (TextView) findViewById(R.id.progress_text);
 		textProgress.setVisibility(View.GONE);
+		btnMapLocation = (Button)findViewById(R.id.map_location_button);
 
 		if (icicle != null) {
 			havePicture = icicle.getBoolean("photo");
@@ -244,11 +253,10 @@ public class Home extends Activity {
 				Intent i = new Intent(Home.this, Details.class);
 				extras.putString("name", name);
 				extras.putString("email", email);
-				extras.putString("subject", subject);
-				extras.putBoolean("photo", havePicture);
+				extras.putString("subject", subject);				
 
 				i.putExtras(extras);
-				startActivity(i);
+				startActivityForResult(i, DETAILS_ACTIVITY);
 			}
 		});
 		btnPicture.setOnClickListener(new OnClickListener() {
@@ -263,34 +271,117 @@ public class Home extends Activity {
 						MediaStore.ACTION_IMAGE_CAPTURE);
 				imageCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri
 						.fromFile(photo));
-				startActivityForResult(imageCaptureIntent, 1);
+				startActivityForResult(imageCaptureIntent, PICTURE_ACTIVITY);
 			}
 		});
 		btnReport.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				locationDetermined = true;
+			public void onClick(View v) {				
 				uploadToFMS();
 			}
 		});
+		btnMapLocation.setOnClickListener(new OnClickListener() {      
+      public void onClick(View view) {
+        
+        // display location map activity
+        Intent locationIntent = new Intent(view.getContext(), LocationActivity.class);
+
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(LocationActivity.LOCATION_CAN_DRAG, true);        
+
+        if (locationDetermined && latitude != null && longitude != null) {
+          bundle.putLong(LocationActivity.LOCATION_LAT, (long) (latitude * 1E6));
+          bundle.putLong(LocationActivity.LOCATION_LONG, (long) (longitude * 1E6));
+          bundle.putBoolean(LocationActivity.LOCATION_CAN_CREATE, false);
+        } else {
+          bundle.putBoolean(LocationActivity.LOCATION_CAN_CREATE, true);
+        }
+
+        locationIntent.putExtras(bundle);
+        startActivityForResult(locationIntent, LOCATION_MAP_ACTIVITY);        
+      }
+    });
 	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// Log.d(LOG_TAG, "onActivityResult");
-		// Log.d(LOG_TAG, "Activity.RESULT_OK code = " + Activity.RESULT_OK);
-		// Log.d(LOG_TAG, "resultCode = " + resultCode + "requestCode = "
-		// + requestCode);
-		if (resultCode == Activity.RESULT_OK && requestCode == 1) {
-			havePicture = true;
-			extras.putBoolean("photo", true);
-			Resources res = getResources();
-			Drawable checked = res.getDrawable(R.drawable.done);
-			checked.setBounds(0, 0, checked.getIntrinsicWidth(), checked
-					.getIntrinsicHeight());
-			btnPicture.setCompoundDrawables(null, null, checked, null);
-			btnPicture.setText("Photo taken");
-		}
-		Log.d(LOG_TAG, "havePicture = " + havePicture.toString());
+	  // Log.d(LOG_TAG, "onActivityResult");
+	  // Log.d(LOG_TAG, "Activity.RESULT_OK code = " + Activity.RESULT_OK);
+	  // Log.d(LOG_TAG, "resultCode = " + resultCode + "requestCode = "
+	  // + requestCode);		
+	  super.onActivityResult(requestCode, resultCode, data);
+
+	  Resources res = getResources();
+	  Drawable checked = res.getDrawable(R.drawable.done);    
+	  checked.setBounds(0, 0, checked.getIntrinsicWidth(), checked.getIntrinsicHeight());
+
+	  switch (requestCode) {
+	    /*case PICK_PHOTO_ACTIVITY: {
+        if (resultCode == RESULT_OK) {
+          Bitmap bitmap;
+          try {
+            bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(data.getData()));
+            storeNewPhoto(bitmap, data.getData().toString());
+          } catch (FileNotFoundException ex) {
+            Log.e(getPackageName(), "Error loading image file", ex);
+          }
+        }
+        break;
+      }*/
+	    case DETAILS_ACTIVITY :{
+	      if (resultCode == RESULT_OK) {
+	        Bundle extras = data.getExtras();
+	        if (extras != null) {
+	          name = extras.getString("name");
+	          email = extras.getString("name");
+	          subject = extras.getString("subject");
+
+	          // Do we have the details?
+	          if ((name != null) && (email != null) && (subject != null)) {
+	            haveDetails = true;
+
+	            btnDetails.setText("Details added: '" + subject + "'");
+	            btnDetails.setCompoundDrawables(null, null, checked, null);
+	          }
+	        }
+	      }
+	      break;
+	    }
+	    case PICTURE_ACTIVITY: {
+	      if (resultCode == RESULT_OK) {
+	        havePicture = true;
+	        extras.putBoolean("photo", true);          
+	        btnPicture.setCompoundDrawables(null, null, checked, null);
+	        btnPicture.setText("Photo taken");              
+	      }
+	      Log.d(LOG_TAG, "havePicture = " + havePicture.toString());
+	      break;
+	    }
+	    case LOCATION_MAP_ACTIVITY: {
+	      if (resultCode == RESULT_OK) {
+	        Bundle extras = data.getExtras();
+	        if (extras != null) {
+	          locationDetermined = true;        
+	          btnMapLocation.setText("Edit location");         
+	          btnMapLocation.setCompoundDrawables(null, null, checked, null);
+
+	          latitude = extras.getLong(LocationActivity.LOCATION_LAT) / 1.0E6;
+	          longitude = extras.getLong(LocationActivity.LOCATION_LONG) / 1.0E6;
+	          latString = latitude.toString();
+	          longString = longitude.toString();                            
+	          if (extras.getString("Address") != null) {
+	            addressString = extras.getString(LocationActivity.LOCATION_ADDRESS);
+	          }                    
+	        }
+	      }
+	      break;
+	    }
+	  }
+	  
+	  if (haveDetails && havePicture) {
+	    btnReport.setVisibility(View.VISIBLE);
+	    btnReport.setText("GPS found! Report to Fix My Street");
+	    textProgress.setVisibility(View.GONE);
+	  } 	  
 	}
 
 	@Override
@@ -548,6 +639,8 @@ public class Home extends Activity {
 			.setText("Waiting for a GPS fix... Please make sure you can see the sky.");
 		} else {
 			// but if all the requirements have been met, proceed
+		  btnMapLocation.setText("Edit Location");
+		  
 			latitude = location.getLatitude();
 			longitude = location.getLongitude();
 			latString = latitude.toString();

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/locationlayout" 
+	android:orientation="vertical"
+	android:layout_width="fill_parent" 
+	android:layout_height="fill_parent">
+
+	<com.google.android.maps.MapView
+		android:id="@+id/mapView" 
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent" 
+		android:clickable="true"
+		android:apiKey="@string/mapsKey"/>
+	  
+  <ImageButton android:id="@+id/useGPSBtn"
+        android:hint="Toggle locking map to GPS"
+		android:clickable="true"
+		android:src="@drawable/ic_menu_mylocation"		 
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"	  		
+		android:onClick="useGPSBtnClickHandler" 
+		android:layout_width="wrap_content" 
+		android:layout_height="wrap_content"/>
+	
+	<Button android:id="@+id/setLocation" 
+	    android:layout_height="wrap_content"
+		android:text="Set Location"
+		android:onClick="locationClickHandler"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentTop="true"
+		android:layout_alignTop="@+id/useGPSBtn"
+        android:layout_toRightOf="@+id/useGPSBtn" 
+		android:layout_width="wrap_content"/>
+		      
+	<ImageView android:id="@+id/drag" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:src="@drawable/marker"
+		android:visibility="gone" />
+
+</RelativeLayout>
