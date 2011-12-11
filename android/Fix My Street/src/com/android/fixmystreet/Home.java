@@ -186,7 +186,7 @@ public class Home extends Activity {
 	public void onRestart() {
 		// Log.d(LOG_TAG, "onRestart, havePicture = " + havePicture);
 		testProviders();
-		checkBundle();
+		//checkBundle();
 		super.onRestart();
 	}
 
@@ -250,7 +250,7 @@ public class Home extends Activity {
 	private void setListeners() {
 		btnDetails.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				Intent i = new Intent(Home.this, Details.class);
+				Intent i = new Intent(v.getContext(), Details.class);
 				extras.putString("name", name);
 				extras.putString("email", email);
 				extras.putString("subject", subject);				
