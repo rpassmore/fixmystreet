@@ -106,13 +106,21 @@ public class LocationActivity extends MapActivity {
     //add an existing point to be plotted 
     Bundle bundle = this.getIntent().getExtras();   
     if(getIntent().hasExtra(LOCATION_LAT) && getIntent().hasExtra(LOCATION_LONG)) {
+      //enable the set point button
+      setLocationButon.setEnabled(true);
+      setLocationButon.setVisibility(View.VISIBLE);  
+      
       GeoPoint point = new GeoPoint( (int)bundle.getLong(LOCATION_LAT), (int)bundle.getLong(LOCATION_LONG));
       sitesOverlay.addItem(new OverlayItem(point, "", ""));
-      //There is already a location then don't use the GPS location on less asked to 
+      //There is already a location then don't use the GPS location unless asked to 
       useGPSLocation = false;
 
       //scroll to the stored point    
       mapController.animateTo(point);    
+    } else {
+      //no points to display so disable the set location button
+      setLocationButon.setEnabled(false);
+      setLocationButon.setVisibility(View.INVISIBLE);
     }
     
     canDrag  = bundle.getBoolean(LOCATION_CAN_DRAG);
@@ -121,7 +129,7 @@ public class LocationActivity extends MapActivity {
     //if the location can not be changed hide and disable the location setting button
     if(!canDrag && !canCreate) {
       setLocationButon.setEnabled(false);
-      setLocationButon.setVisibility(View.GONE);
+      setLocationButon.setVisibility(View.INVISIBLE);
     }
     
     //temp set location for emulator
@@ -214,6 +222,11 @@ public class LocationActivity extends MapActivity {
       if(canCreate) {
         GeoPoint point = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
         sitesOverlay.addItem(new OverlayItem(point, "", ""));
+        
+        setLocationButon.setEnabled(true);
+        setLocationButon.setVisibility(View.VISIBLE);
+        
+        //only allow creation of one point
         canCreate = false;
       }
     }
