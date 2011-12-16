@@ -21,6 +21,12 @@
  */
 package com.android.fixmystreet;
 
+import greendroid.app.GDMapActivity;
+import greendroid.widget.NormalActionBarItem;
+import greendroid.widget.ActionBarItem.Type;
+import greendroid.widget.ActionBarItem;
+import greendroid.widget.LoaderActionBarItem;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,20 +47,18 @@ import android.util.Log;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
-import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.OverlayItem;
 
-public class LocationActivity extends MapActivity {
+public class LocationActivity extends GDMapActivity {
 
   //used to get location info from the returned bundle
   public static final String LOCATION_ADDRESS = "Address";
@@ -63,8 +67,8 @@ public class LocationActivity extends MapActivity {
   public static final String LOCATION_CAN_DRAG = "canDrag";
   public static final String LOCATION_CAN_CREATE = "canCreate";
     
-  private Button setLocationButon;
-  private ImageButton useGPSButton;
+  private ActionBarItem setLocationButon;
+  private ActionBarItem useGPSButton;
   
   private MapController mapController;
   private MapView mapView;
@@ -77,13 +81,14 @@ public class LocationActivity extends MapActivity {
   private LocationListener geoUpdateHandler;
   
   public void onCreate(Bundle savedBundle) {
-    super.onCreate(savedBundle);
-    setContentView(R.layout.location_activity);
+    super.onCreate(savedBundle);    
+    setActionBarContentView(R.layout.location_activity);
 
-    geoUpdateHandler = new GeoUpdateHandler();
+    geoUpdateHandler = new GeoUpdateHandler();    
     
-    setLocationButon = (Button)findViewById(R.id.setLocation); 
-    useGPSButton = (ImageButton)findViewById(R.id.useGPSBtn);
+    setLocationButon = addActionBarItem(Type.Locate, R.id.action_bar_set_location);    
+    useGPSButton = addActionBarItem(Type.LocateMyself, R.id.action_bar_locate);
+    
     
     // create a map view
     mapView = (MapView) findViewById(R.id.mapView);
@@ -106,9 +111,6 @@ public class LocationActivity extends MapActivity {
     //add an existing point to be plotted 
     Bundle bundle = this.getIntent().getExtras();   
     if(getIntent().hasExtra(LOCATION_LAT) && getIntent().hasExtra(LOCATION_LONG)) {
-      //enable the set point button
-      setLocationButon.setEnabled(true);
-      setLocationButon.setVisibility(View.VISIBLE);  
       
       GeoPoint point = new GeoPoint( (int)bundle.getLong(LOCATION_LAT), (int)bundle.getLong(LOCATION_LONG));
       sitesOverlay.addItem(new OverlayItem(point, "", ""));
@@ -118,9 +120,8 @@ public class LocationActivity extends MapActivity {
       //scroll to the stored point    
       mapController.animateTo(point);    
     } else {
-      //no points to display so disable the set location button
-      setLocationButon.setEnabled(false);
-      setLocationButon.setVisibility(View.INVISIBLE);
+      //no points to display so disable the start finding the location
+      useGPSLocation = true;
     }
     
     canDrag  = bundle.getBoolean(LOCATION_CAN_DRAG);
@@ -128,8 +129,7 @@ public class LocationActivity extends MapActivity {
     
     //if the location can not be changed hide and disable the location setting button
     if(!canDrag && !canCreate) {
-      setLocationButon.setEnabled(false);
-      setLocationButon.setVisibility(View.INVISIBLE);
+         getActionBar().removeItem(setLocationButon);
     }
     
     //temp set location for emulator
@@ -149,18 +149,38 @@ public class LocationActivity extends MapActivity {
     return false;
   }
   
+  @Override
+  public boolean onHandleActionBarItemClick(ActionBarItem item, int position) {
+
+      switch (item.getItemId()) {
+          case R.id.action_bar_locate:
+              useGPSBtnClickHandler();
+              break;
+
+          case R.id.action_bar_set_location:
+              locationClickHandler();
+              break;
+          
+          default:
+              return super.onHandleActionBarItemClick(item, position);
+      }
+
+      return true;
+  }
+  
   /**
    * Called when the user clicks the set location button, returns the lat and long of the item in a bundle
    * @param view
    */
-  public void locationClickHandler(View view) {
+  public void locationClickHandler() {
     
     //to return data
     Intent intent = new Intent();
     Bundle bundle = new Bundle();
     //use the last item in the list
+    if(sitesOverlay.getItems().size() > 0) {
     OverlayItem item = sitesOverlay.getItems().get(sitesOverlay.size() - 1);
-    if(item != null) {
+    //if(item != null) {
       bundle.putLong(LOCATION_LAT, item.getPoint().getLatitudeE6()); 
       bundle.putLong(LOCATION_LONG, item.getPoint().getLongitudeE6());
 
@@ -184,17 +204,18 @@ public class LocationActivity extends MapActivity {
       }
       intent.putExtras(bundle);
       setResult(RESULT_OK, intent);
+      finish();
     } else {
-      setResult(RESULT_CANCELED);
+      Toast.makeText(this, "Please add a location", Toast.LENGTH_SHORT).show();
     }
-    finish();        
+            
   }
   
   /**
    * Called when the user clicks the set use GPS button
    * @param view
    */
-  public void useGPSBtnClickHandler(View view) {
+  public void useGPSBtnClickHandler() {
     if(useGPSLocation) {
       useGPSLocation = false;
       locationManager.removeUpdates(geoUpdateHandler);
@@ -204,6 +225,7 @@ public class LocationActivity extends MapActivity {
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
       }
       locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, geoUpdateHandler);
+      Toast.makeText(this, "Aquiring current location", Toast.LENGTH_SHORT).show();
     }
   }
 
@@ -221,10 +243,7 @@ public class LocationActivity extends MapActivity {
     public void onLongPress(MotionEvent e) {
       if(canCreate) {
         GeoPoint point = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
-        sitesOverlay.addItem(new OverlayItem(point, "", ""));
-        
-        setLocationButon.setEnabled(true);
-        setLocationButon.setVisibility(View.VISIBLE);
+        sitesOverlay.addItem(new OverlayItem(point, "", ""));                
         
         //only allow creation of one point
         canCreate = false;
@@ -286,7 +305,7 @@ public class LocationActivity extends MapActivity {
       super(marker);
       this.marker = marker;
       
-      //call populate to NPE from ItemizedOverlay 
+      //call populate to fix NPE from ItemizedOverlay 
       populate();
       dragImage = (ImageView) findViewById(R.id.drag);
       xDragImageOffset = dragImage.getDrawable().getIntrinsicWidth() / 2;
@@ -319,11 +338,11 @@ public class LocationActivity extends MapActivity {
 
       if (action == MotionEvent.ACTION_DOWN && canDrag) {
         for (OverlayItem item : items) {
-          Point p = new Point(0, 0);
+          Point point = new Point(0, 0);
 
-          mapView.getProjection().toPixels(item.getPoint(), p);
+          mapView.getProjection().toPixels(item.getPoint(), point);
 
-          if (hitTest(item, marker, x - p.x, y - p.y)) {
+          if (hitTest(item, marker, x - point.x, y - point.y)) {
             result = true;
             inDrag = item;
             items.remove(inDrag);
@@ -332,11 +351,11 @@ public class LocationActivity extends MapActivity {
             xDragTouchOffset = 0;
             yDragTouchOffset = 0;
 
-            setDragImagePosition(p.x, p.y);
+            setDragImagePosition(point.x, point.y);
             dragImage.setVisibility(View.VISIBLE);
 
-            xDragTouchOffset = x - p.x;
-            yDragTouchOffset = y - p.y;
+            xDragTouchOffset = x - point.x;
+            yDragTouchOffset = y - point.y;
 
             break;
           }

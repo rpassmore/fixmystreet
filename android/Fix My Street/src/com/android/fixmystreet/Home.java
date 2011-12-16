@@ -3,6 +3,8 @@
 // **************************************************************************
 package com.android.fixmystreet;
 
+import greendroid.app.GDActivity;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -45,7 +47,7 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.view.View.OnClickListener;
 
-public class Home extends Activity {
+public class Home extends GDActivity {
 	// ****************************************************
 	// Local variables
 	// ****************************************************
@@ -112,7 +114,9 @@ public class Home extends Activity {
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-		setContentView(R.layout.home);
+		setActionBarContentView(R.layout.home);
+		this.setTitle("FixMYStreet");
+		
 		// Log.d(LOG_TAG, "onCreate, havePicture = " + havePicture);
 		settings = getSharedPreferences(PREFS_NAME, 0);
 		testProviders();

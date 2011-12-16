@@ -1,6 +1,6 @@
 package com.android.fixmystreet;
 
-import android.app.Activity;
+import greendroid.app.GDActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.util.Linkify;
@@ -8,14 +8,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-public class Help extends Activity {
+public class Help extends GDActivity {
 	private Bundle extras = null;
 
 	@Override
 	protected void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		extras = getIntent().getExtras();
-		setContentView(R.layout.help);
+		setActionBarContentView(R.layout.help);
 		TextView noteView = (TextView) findViewById(R.id.faq);
 		Linkify.addLinks(noteView, Linkify.ALL);
 	}

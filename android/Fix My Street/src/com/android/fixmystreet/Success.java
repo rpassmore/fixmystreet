@@ -4,7 +4,7 @@
 
 package com.android.fixmystreet;
 
-import android.app.Activity;
+import greendroid.app.GDActivity;
 import android.content.Intent;
 import android.os.Bundle;
 //import android.util.Log;
@@ -12,7 +12,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class Success extends Activity {
+public class Success extends GDActivity {
 
 	//private static final String LOG_TAG = "Success";
 
@@ -20,7 +20,7 @@ public class Success extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.success);
+		setActionBarContentView(R.layout.success);
 	}
 
 	// ****************************************************

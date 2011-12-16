@@ -1,6 +1,23 @@
 <resources>
-	<style name="Theme.Filler" parent="android:Theme">
+	  <style name="Theme.Filler" parent="@style/Theme.GreenDroid.NoTitleBar">
 		<item name="android:windowBackground">@drawable/blue_filler</item>
-		<item name="android:textColor">#000000</item>
+		<item name="android:textColor">#000000</item>		
 	</style>
+	<!-- <style name="Theme.GDCatalog" parent="@style/Theme.GreenDroid.NoTitleBar">
+	
+		<item name="gdActionBarTitleColor">@android:color/white</item>
+		<item name="gdActionBarBackground">@drawable/action_bar_background</item>
+		<item name="gdActionBarDividerDrawable">@drawable/action_bar_divider</item>
+		<item name="gdActionBarDividerWidth">2px</item>
+		<item name="gdActionBarApplicationDrawable">@drawable/greendroid_application_logo</item>
+	
+	</style>
+
+    <style name="Theme.GDCatalog.TweakedItems" parent="@style/Theme.GDCatalog">
+        
+        <item name="gdTextAppearanceLarge">@style/TextAppearanceLarge</item>
+        <item name="gdItemViewPreferredHeight">45dp</item>       
+        <item name="gdSeparatorItemViewStyle">@style/SeparatorItemView</item>
+        
+    </style>-->
 </resources>

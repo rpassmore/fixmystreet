@@ -8,6 +8,8 @@
 
 package com.android.fixmystreet;
 
+import greendroid.app.GDActivity;
+
 import java.util.regex.*;
 
 import android.app.Activity;
@@ -21,7 +23,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 
-public class Details extends Activity {
+public class Details extends GDActivity {
 	private EditText nameET;
 	private EditText emailET;
 	private EditText subjectET;
@@ -44,7 +46,7 @@ public class Details extends Activity {
 		super.onCreate(savedInstanceState);
 
 		// set up the page
-		setContentView(R.layout.details);
+		setActionBarContentView(R.layout.details);
 		nameET = (EditText) findViewById(R.id.name_text);
 		emailET = (EditText) findViewById(R.id.email_text);
 		subjectET = (EditText) findViewById(R.id.subject_text);

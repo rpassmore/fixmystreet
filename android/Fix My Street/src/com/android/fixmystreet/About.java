@@ -1,6 +1,6 @@
 package com.android.fixmystreet;
 
-import android.app.Activity;
+import greendroid.app.GDActivity;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
@@ -9,7 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-public class About extends Activity {
+public class About extends GDActivity {
 
 	private Bundle extras = null;
 	String versionName = "";
@@ -17,7 +17,7 @@ public class About extends Activity {
 	@Override
 	protected void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-		setContentView(R.layout.about);
+		setActionBarContentView(R.layout.about);
 		extras = getIntent().getExtras();
 		
 		try {
