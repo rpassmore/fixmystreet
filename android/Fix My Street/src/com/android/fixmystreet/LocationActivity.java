@@ -66,6 +66,7 @@ public class LocationActivity extends GDMapActivity {
   public static final String LOCATION_LONG = "Long";  
   public static final String LOCATION_CAN_DRAG = "canDrag";
   public static final String LOCATION_CAN_CREATE = "canCreate";
+  private static final String USE_GPS_LOCATION = "useGPSLocation";
     
   private ActionBarItem setLocationButon;
   private ActionBarItem useGPSButton;
@@ -114,13 +115,14 @@ public class LocationActivity extends GDMapActivity {
       
       GeoPoint point = new GeoPoint( (int)bundle.getLong(LOCATION_LAT), (int)bundle.getLong(LOCATION_LONG));
       sitesOverlay.addItem(new OverlayItem(point, "", ""));
-      //There is already a location then don't use the GPS location unless asked to 
-      useGPSLocation = false;
+      
+      //There is already a location then don't use the GPS location unless asked to                
+      useGPSLocation = bundle.getBoolean(USE_GPS_LOCATION);      
 
       //scroll to the stored point    
       mapController.animateTo(point);    
     } else {
-      //no points to display so disable the start finding the location
+      //no points to display so start finding the location
       useGPSLocation = true;
     }
     
@@ -137,13 +139,47 @@ public class LocationActivity extends GDMapActivity {
     //mapController.animateTo(tmpPoint);    
     
     if(useGPSLocation) {
-      locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-      locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new GeoUpdateHandler());
+      startGPS();
     }
     
    
   }
 
+  @Override
+  protected void onPause() {
+    // Log.d(LOG_TAG, "onPause, havePicture = " + havePicture);
+    super.onPause();
+    stopGPS();
+  }
+
+  @Override
+  protected void onStop() {
+    // Log.d(LOG_TAG, "onStop, havePicture = " + havePicture);
+    super.onStop();
+    stopGPS();
+  }
+
+  @Override
+  public void onRestart() {
+    // Log.d(LOG_TAG, "onRestart, havePicture = " + havePicture);        
+    super.onRestart();
+    //restart the GPS if it was being used before
+    if(useGPSLocation) {
+      startGPS();
+    } 
+  }
+  
+  @Override
+  protected void onSaveInstanceState(Bundle bundle) {
+    bundle.putBoolean(USE_GPS_LOCATION, useGPSLocation);
+    super.onSaveInstanceState(bundle);
+  }
+  
+  @Override
+  protected void onRestoreInstanceState(Bundle bundle) {
+    useGPSLocation = bundle.getBoolean(USE_GPS_LOCATION);
+  }
+  
   @Override
   protected boolean isRouteDisplayed() {
     return false;
@@ -217,18 +253,27 @@ public class LocationActivity extends GDMapActivity {
    */
   public void useGPSBtnClickHandler() {
     if(useGPSLocation) {
-      useGPSLocation = false;
-      locationManager.removeUpdates(geoUpdateHandler);
+      stopGPS();
     } else {
-      useGPSLocation = true;
-      if(locationManager == null) {
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-      }
-      locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, geoUpdateHandler);
-      Toast.makeText(this, "Aquiring current location", Toast.LENGTH_SHORT).show();
+      startGPS();
     }
   }
 
+  private void stopGPS() {
+    useGPSLocation = false;
+    locationManager.removeUpdates(geoUpdateHandler);
+  }
+  
+  private void startGPS() {
+    useGPSLocation = true;
+    if(locationManager == null) {
+      locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+    }
+    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, geoUpdateHandler);
+    Toast.makeText(this, "Aquiring current location", Toast.LENGTH_SHORT).show();
+  }
+  
+  
   public class MyOnGestureListener implements OnGestureListener {
     public boolean onDown(MotionEvent e) {
       // TODO Auto-generated method stub
